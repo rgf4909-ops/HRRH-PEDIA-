@@ -1178,7 +1178,7 @@ function getMyRating(movie) {
                 btn.className = "pb-3 text-[15px] font-bold text-gray-900 border-b-2 border-gray-900 transition-colors uppercase tracking-widest";
                 content.classList.remove('hidden');
                 content.classList.add('flex');
-                if (t === 'quotes') renderQuotesEmpty();
+                if (t === 'quotes') renderQuotes();
             } else {
                 btn.className = "pb-3 text-[15px] font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition-colors uppercase tracking-widest";
                 content.classList.add('hidden');
@@ -2076,36 +2076,24 @@ function renderQuotesEmpty() {
     }
 }
 
-// 1. 명대사 등록 함수 (좋아요 & 댓글 껍데기 추가)
-function addQuote() {
-    const author = document.getElementById('new-quote-author').value;
-    const avatar = document.getElementById('new-quote-avatar').value;
-    const text = document.getElementById('new-quote-text').value;
-
-    if (!author || !text) return;
-
-    const list = document.getElementById('quotes-list');
-    const item = document.createElement('div');
-    item.className = "bg-white p-4 rounded-xl shadow-sm border";
-
+// 명대사 카드 HTML 생성 (재사용)
+function buildQuoteItem(quoteObj) {
+    const { id: uniqueId, author, avatar, text } = quoteObj;
     const defaultAvatar = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
     const finalAvatar = avatar ? avatar : defaultAvatar;
-    
-    // 💡 각 명대사마다 고유한 아이디(시간값)를 부여해서 댓글창이 안 꼬이게 만듭니다.
-    const uniqueId = Date.now();
-
+    const item = document.createElement('div');
+    item.className = "bg-white p-4 rounded-xl shadow-sm border";
+    item.dataset.quoteId = uniqueId;
     item.innerHTML = `
         <div class="flex items-center gap-3 mb-2">
             <img src="${finalAvatar}" class="w-8 h-8 rounded-full object-cover border border-gray-100">
             <span class="font-bold text-sm">${author}</span>
-            
             <div class="ml-auto flex gap-2">
                 <button onclick="editQuote(this)" class="text-xs font-bold text-gray-400 hover:text-blue-500 transition-colors">수정</button>
                 <button onclick="deleteQuote(this)" class="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors">삭제</button>
             </div>
         </div>
-        <p class="text-[15px] text-gray-800 leading-relaxed italic mt-1 break-words font-serif quote-text whitespace-pre-wrap">"${text}"</p>
-        
+        <p class="text-[15px] text-gray-800 leading-relaxed mt-1 break-words font-bold quote-text whitespace-pre-wrap">"${text}"</p>
         <div class="flex items-center gap-4 mt-3 pt-3 border-t border-gray-100 text-[11px] font-bold">
             <button onclick="toggleQuoteLike(this)" class="flex items-center gap-1 text-gray-400 hover:text-rose-400 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" /></svg>
@@ -2116,7 +2104,6 @@ function addQuote() {
                 답글 <span id="quote-reply-count-${uniqueId}"></span>
             </button>
         </div>
-
         <div id="quote-replies-${uniqueId}" class="hidden mt-3 pt-1 relative z-20">
             <div id="quote-replies-list-${uniqueId}" class="space-y-2 mb-2"></div>
             <div class="flex gap-2 mt-2">
@@ -2125,14 +2112,66 @@ function addQuote() {
             </div>
         </div>
     `;
+    return item;
+}
 
-    list.prepend(item);
+// Firebase에서 명대사 불러와 렌더링
+function renderQuotes() {
+    const movie = movieData.find(m => String(m.id) === String(currentMovieId));
+    if (!movie) return;
+    const list = document.getElementById('quotes-list');
+    list.innerHTML = '';
+    (movie.quotes || []).forEach(q => list.appendChild(buildQuoteItem(q)));
     renderQuotesEmpty();
+}
 
-    // 입력 초기화
+// 명대사 등록 - Firebase 저장 포함
+function addQuote() {
+    const author = document.getElementById('new-quote-author').value.trim();
+    const avatar = document.getElementById('new-quote-avatar').value.trim();
+    const text = document.getElementById('new-quote-text').value.trim();
+    if (!author || !text) return;
+    const movie = movieData.find(m => String(m.id) === String(currentMovieId));
+    if (!movie) return;
+    const newQuote = { id: Date.now(), author, avatar, text };
+    if (!movie.quotes) movie.quotes = [];
+    movie.quotes.unshift(newQuote);
+    db.collection("movies").doc(String(currentMovieId)).update({ quotes: movie.quotes });
+    const list = document.getElementById('quotes-list');
+    list.prepend(buildQuoteItem(newQuote));
+    renderQuotesEmpty();
     document.getElementById('new-quote-author').value = '';
     document.getElementById('new-quote-avatar').value = '';
     document.getElementById('new-quote-text').value = '';
+}
+
+// 명대사 삭제
+function deleteQuote(btn) {
+    if (!confirm('이 명대사를 삭제할까요?')) return;
+    const item = btn.closest('[data-quote-id]');
+    const quoteId = Number(item.dataset.quoteId);
+    const movie = movieData.find(m => String(m.id) === String(currentMovieId));
+    if (!movie) return;
+    movie.quotes = (movie.quotes || []).filter(q => q.id !== quoteId);
+    db.collection("movies").doc(String(currentMovieId)).update({ quotes: movie.quotes });
+    item.remove();
+    renderQuotesEmpty();
+}
+
+// 명대사 수정
+function editQuote(btn) {
+    const item = btn.closest('[data-quote-id]');
+    const quoteId = Number(item.dataset.quoteId);
+    const movie = movieData.find(m => String(m.id) === String(currentMovieId));
+    if (!movie) return;
+    const quote = (movie.quotes || []).find(q => q.id === quoteId);
+    if (!quote) return;
+    const newText = prompt('명대사를 수정하세요:', quote.text);
+    if (newText === null || !newText.trim()) return;
+    quote.text = newText.trim();
+    db.collection("movies").doc(String(currentMovieId)).update({ quotes: movie.quotes });
+    const textEl = item.querySelector('.quote-text');
+    if (textEl) textEl.innerText = '"' + quote.text + '"';
 }
 
 // ============================================
