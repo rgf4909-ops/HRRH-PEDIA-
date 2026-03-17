@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>혜렁피디아 - 영화 평가 서비스</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&family=Gaegu:wght@400;700&display=swap');
         
@@ -250,12 +253,6 @@ overflow-y:auto;
 <div class="flex flex-wrap items-center gap-2 mb-6">
     <h2 class="text-2xl font-black text-gray-800 tracking-tight mr-auto">평가한 작품들</h2>
     
-    <select id="friend-filter-select" onchange="handleSearch()" class="bg-rose-50 border border-rose-100 rounded-xl px-3 py-2 text-sm font-bold text-rose-600 outline-none cursor-pointer hover:bg-rose-100 transition-colors shadow-sm">
-        <option value="all">전체 보기</option>
-        <option value="참치">부렁이와 함께 본 영화</option>
-        <option value="헤리미">헤리미와 함께 본 영화</option>
-    </select>
-
     <select id="main-sort-select" onchange="handleSearch()" class="bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold text-gray-600 outline-none cursor-pointer hover:bg-gray-50 transition-colors shadow-sm">
         <option value="dateDesc">최신순</option>
         <option value="dateAsc">오래된 순</option>
@@ -264,15 +261,17 @@ overflow-y:auto;
         <option value="title">가나다순</option>
         <option value="myRatingDesc">나의 별점 높은 순</option>
         <option value="myRatingAsc">나의 별점 낮은 순</option>
+        <option value="withHerung">🫶 헤렁이와 함께 본 영화</option>
     </select>
 </div>
 
 <div id="analysis-modal" class="fixed inset-0 z-[80] hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]">
         
-        <button onclick="closeAnalysisModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-900 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 transition-colors">✕</button>
+        <button onclick="closeAnalysisModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-900 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 transition-colors z-10">✕</button>
 
-        <h3 class="text-xl font-black text-gray-900 mb-6">취향 분석</h3>
+        <div class="p-6 overflow-y-auto custom-scrollbar">
+        <h3 class="text-xl font-black text-gray-900 mb-6">🫶 헤렁이와의 취향 분석</h3>
 
         <div class="space-y-4">
             <div class="bg-rose-50 rounded-2xl p-5 border border-rose-100 flex items-center justify-between">
@@ -286,24 +285,27 @@ overflow-y:auto;
             <div class="flex gap-4">
                 <div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-100 text-center">
                     <p class="text-gray-500 text-xs font-bold mb-1">취향 매칭률</p>
-                    <p class="text-gray-900 font-black text-2xl"><span id="stat-match-rate">0</span>%</p>
-                    <p class="text-[10px] text-gray-400 mt-1">서로 별점이 비슷할수록 올라가요!</p>
+                    <p class="text-gray-900 font-black text-2xl"><span id="stat-match-rate">-</span>%</p>
+                    <p class="text-[10px] text-gray-400 mt-1">별점 차이가 작을수록 올라가요!</p>
                 </div>
-                
                 <div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-100 text-center">
                     <p class="text-gray-500 text-xs font-bold mb-1">우리의 최애 장르</p>
-                    <p id="stat-top-genre" class="text-gray-900 font-black text-lg mt-1">액션</p>
+                    <p id="stat-top-genre" class="text-gray-900 font-black text-lg mt-1">-</p>
                     <p class="text-[10px] text-gray-400 mt-1">같이 가장 많이 본 장르</p>
                 </div>
             </div>
-            
-            <div class="mt-4 pt-4 border-t border-gray-100">
-                <p class="text-gray-700 text-sm font-bold mb-3">서로 최고점을 준 영화 🏆</p>
-                <div id="stat-best-movies" class="flex flex-wrap gap-2">
-                    </div>
+
+            <div class="pt-4 border-t border-gray-100">
+                <p class="text-gray-700 text-sm font-bold mb-3">🍿 둘 다 재밌게 본 영화 <span class="text-[10px] text-gray-400 font-normal">(둘 다 ★4.0 이상)</span></p>
+                <div id="stat-both-loved" class="flex flex-col gap-2"></div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100">
+                <p class="text-gray-700 text-sm font-bold mb-3">🔥 별점이 극명하게 갈린 영화 <span class="text-[10px] text-gray-400 font-normal">(차이 ★1.5 이상)</span></p>
+                <div id="stat-clash-movies" class="flex flex-col gap-2"></div>
+            </div>
             </div>
         </div>
-        
     </div>
 </div>
     
@@ -371,6 +373,10 @@ overflow-y:auto;
                         <input type="url" id="new-movie-poster" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all" placeholder="https://...">
                     </div>
                 </div>
+                <label class="flex items-center gap-3 cursor-pointer bg-rose-50 border border-rose-100 px-4 py-3 rounded-2xl hover:bg-rose-100 transition-colors">
+                    <input type="checkbox" id="new-movie-with-herung" class="accent-rose-500 w-4 h-4 cursor-pointer">
+                    <span class="text-sm font-bold text-rose-500">🫶 헤렁이와 함께 본 영화</span>
+                </label>
                 <button type="submit" id="movie-form-btn" class="w-full py-4 rounded-2xl bg-gray-900 hover:bg-black text-white font-bold text-base shadow-xl shadow-gray-200 transition-all mt-4">영화 저장하기 ✨</button>
             </form>
         </div>
@@ -674,9 +680,6 @@ d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 11.996c0 2.29.982
     </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 <script>
     const firebaseConfig = {
@@ -774,6 +777,7 @@ d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 11.996c0 2.29.982
         document.getElementById('new-movie-release-year').value = '';
         document.getElementById('new-movie-avg-rating').value = '';
         document.getElementById('new-movie-genre').value = '';
+        document.getElementById('new-movie-with-herung').checked = false;
         openModal('add-movie');
     }
 
@@ -813,9 +817,8 @@ d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 11.996c0 2.29.982
 
    // 🌟 실시간 검색, 친구 필터링 및 정렬 처리 통합
 function handleSearch() {
-    // 1. 화면에 있는 입력값 3대장 다 가져오기
+    // 1. 화면에 있는 입력값 가져오기
     const query = document.getElementById('search-input').value.trim().toLowerCase();
-    const friendVal = document.getElementById('friend-filter-select').value;
     const sortVal = document.getElementById('main-sort-select').value;
 
     // 전체 데이터에서 시작!
@@ -826,23 +829,12 @@ function handleSearch() {
         filteredData = filteredData.filter(m => m.title.toLowerCase().includes(query));
     }
 
-    // 💡 3. 친구 필터가 'all(전체보기)'이 아니면 선택한 친구만 남기기
-    if (friendVal !== 'all') {
-        // 주의: DB에 친구 이름이 저장되는 속성명(m.friend, m.with 등)에 맞춰 'm.friend' 부분을 수정해야 할 수 있습니다!
-        filteredData = filteredData.filter(m => m.friend === friendVal); 
+    // 3. 헤렁이와 함께 본 영화 필터
+    if (sortVal === 'withHerung') {
+        filteredData = filteredData.filter(m => m.withHerung === true);
     }
 
-    // 4. 정렬 처리 (select에서 고른 값에 따라 순서 바꾸기)
-    if (sortVal === 'dateDesc') {
-        // 최신순 (예시)
-        filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
-    } else if (sortVal === 'ratingDesc') {
-        // 별점 높은순 (예시)
-        filteredData.sort((a, b) => b.rating - a.rating);
-    }
-    // (여기에 기존에 정렬용으로 짜두신 코드가 있다면 마저 넣어주시면 됩니다!)
-
-    // 5. 최종적으로 걸러진 데이터만 화면에 그리기
+    // 4. 최종적으로 걸러진 데이터만 화면에 그리기
     renderMovies(filteredData);
 }
 
@@ -997,16 +989,17 @@ function getMyRating(movie) {
         const critics = document.getElementById('new-movie-critics').value;
         const poster = document.getElementById('new-movie-poster').value;
         const date = document.getElementById('new-movie-date').value;
+        const withHerung = document.getElementById('new-movie-with-herung').checked;
 
         if (editId) {
             db.collection("movies").doc(String(editId)).update({
-                title, releaseYear, avgRating, genre, synopsis, criticsAuthor, criticsRating, critics, poster, date
+                title, releaseYear, avgRating, genre, synopsis, criticsAuthor, criticsRating, critics, poster, date, withHerung
             });
         } else {
             const newId = Date.now();
             const newMovie = {
                 id: newId,
-                title, releaseYear, avgRating, genre, synopsis, criticsAuthor, criticsRating, critics, poster, date,
+                title, releaseYear, avgRating, genre, synopsis, criticsAuthor, criticsRating, critics, poster, date, withHerung,
                 reviews: [], criticsReviews: [], columns: [], hasNew: false
             };
             db.collection("movies").doc(String(newId)).set(newMovie);
@@ -1037,10 +1030,11 @@ function getMyRating(movie) {
             const btn = document.getElementById(`right-tab-${t}`);
             const content = document.getElementById(`right-content-${t}`);
             
-            if(t === tabType) {
+            if (t === tabType) {
                 btn.className = "pb-3 text-[15px] font-bold text-gray-900 border-b-2 border-gray-900 transition-colors uppercase tracking-widest";
                 content.classList.remove('hidden');
                 content.classList.add('flex');
+                if (t === 'quotes') renderQuotesEmpty();
             } else {
                 btn.className = "pb-3 text-[15px] font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition-colors uppercase tracking-widest";
                 content.classList.add('hidden');
@@ -1832,6 +1826,7 @@ setTimeout(()=>{
         document.getElementById('new-movie-critics').value = movie.critics || '';
         document.getElementById('new-movie-poster').value = movie.poster || '';
         document.getElementById('new-movie-date').value = movie.date || getTodayDate();
+        document.getElementById('new-movie-with-herung').checked = movie.withHerung === true;
         
         openModal('add-movie');
     }
@@ -1914,6 +1909,20 @@ text = text.replace(
     return text;
 }
 
+// 명대사 빈 상태 메시지 갱신
+function renderQuotesEmpty() {
+    const list = document.getElementById('quotes-list');
+    const empty = document.getElementById('quotes-empty');
+    if (empty) empty.remove();
+    if (list.children.length === 0) {
+        const msg = document.createElement('p');
+        msg.id = 'quotes-empty';
+        msg.className = "text-center text-gray-400 text-sm py-10";
+        msg.innerText = "아직 작성된 명대사가 없어요.";
+        list.appendChild(msg);
+    }
+}
+
 // 1. 명대사 등록 함수 (좋아요 & 댓글 껍데기 추가)
 function addQuote() {
     const author = document.getElementById('new-quote-author').value;
@@ -1965,6 +1974,7 @@ function addQuote() {
     `;
 
     list.prepend(item);
+    renderQuotesEmpty();
 
     // 입력 초기화
     document.getElementById('new-quote-author').value = '';
@@ -2036,78 +2046,101 @@ function updateQuoteReplyCount(id) {
     countSpan.innerText = count > 0 ? count : '';
 }
 
-// 분석 모달 열기
-function openAnalysisModal() {
-    document.getElementById('analysis-modal').classList.remove('hidden');
-    // 나중에 여기에 calculateTasteStats() 같은 통계 계산 함수를 부를 겁니다!
-}
-
 // 분석 모달 닫기
 function closeAnalysisModal() {
     document.getElementById('analysis-modal').classList.add('hidden');
 }
 
-// 💡 분석 모달창 열기 (업데이트)
+// 💡 분석 모달창 열기
 function openAnalysisModal() {
-    const friendVal = document.getElementById('friend-filter-select').value;
-    
-    // 전체 보기가 선택되어 있으면 누구를 분석할지 물어봅니다.
-    if (friendVal === 'all') {
-        alert("📊 먼저 필터에서 분석할 친구를 선택해주세요! (예: 참치)");
-        return;
-    }
-
-    // 통계 계산 함수 실행
-    calculateTasteStats(friendVal);
+    // 헤렁이와 함께 본 영화 기준으로 바로 분석
+    calculateTasteStats();
     
     // 모달창 띄우기
     document.getElementById('analysis-modal').classList.remove('hidden');
 }
 
 // 💡 취향 매칭률 및 통계 계산 함수
-function calculateTasteStats(friendName) {
-    // 1. 해당 친구와 함께 본 영화만 쏙 골라내기
-    const sharedMovies = movieData.filter(m => m.withFriend === friendName);
+function calculateTasteStats() {
+    const ME = '헤리미';
+    const FRIEND = '부렁';
 
-    // 2. 함께 본 총 영화 개수 찍어주기
+    // 1. 헤렁이와 함께 본 영화만 골라내기
+    const sharedMovies = movieData.filter(m => m.withHerung === true);
     document.getElementById('stat-total-movies').innerText = sharedMovies.length;
 
-    // (같이 본 영화가 하나도 없을 경우 방어 코드)
     if (sharedMovies.length === 0) {
         document.getElementById('stat-match-rate').innerText = '0';
         document.getElementById('stat-top-genre').innerText = '?';
         document.getElementById('stat-best-movies').innerHTML = '<p class="text-sm text-gray-400 mt-2">아직 함께 본 영화가 없어요.</p>';
+        document.getElementById('stat-clash-movies').innerHTML = '<p class="text-xs text-gray-400">아직 데이터가 없어요.</p>';
+        document.getElementById('stat-both-loved').innerHTML = '<p class="text-xs text-gray-400">아직 데이터가 없어요.</p>';
         return;
     }
 
-    // 3. 최애 장르 구하기 (가장 많이 겹치는 장르)
+    // 2. 영화마다 두 사람의 별점 뽑기
+    const ratingPairs = sharedMovies.map(m => {
+        const reviews = m.reviews || [];
+        const myReview = reviews.find(r => r.user === ME && !r.isWanted);
+        const friendReview = reviews.find(r => r.user === FRIEND && !r.isWanted);
+        return {
+            title: m.title,
+            myRating: myReview ? parseFloat(myReview.rating) : null,
+            friendRating: friendReview ? parseFloat(friendReview.rating) : null,
+        };
+    }).filter(p => p.myRating !== null && p.friendRating !== null); // 둘 다 리뷰 쓴 것만
+
+    // 3. 최애 장르
     const genreCounts = {};
     sharedMovies.forEach(m => {
-        // 영화에 장르(genre) 데이터가 있다면 개수를 셉니다.
-        if(m.genre) {
-            genreCounts[m.genre] = (genreCounts[m.genre] || 0) + 1;
+        if (m.genre) {
+            m.genre.split('#').map(g => g.trim()).filter(g => g).forEach(tag => {
+                genreCounts[tag] = (genreCounts[tag] || 0) + 1;
+            });
         }
     });
-    // 가장 많이 나온 장르 찾기 (없으면 '장르 모름')
-    const topGenre = Object.keys(genreCounts).sort((a,b) => genreCounts[b] - genreCounts[a])[0] || "다양함";
+    const topGenre = Object.keys(genreCounts).sort((a,b) => genreCounts[b]-genreCounts[a])[0] || '다양함';
     document.getElementById('stat-top-genre').innerText = topGenre;
 
-    // 4. 취향 매칭률 계산 (지금은 별점(myRating) 평균을 기반으로 한 가짜 매칭률 공식입니다)
-    // 찐 매칭률을 하려면 DB에 '내 별점'과 '친구 별점'이 따로 저장되어 있어야 합니다!
-    const avgRating = sharedMovies.reduce((sum, m) => sum + Number(m.myRating || 5), 0) / sharedMovies.length;
-    // 별점이 높을수록 매칭률이 70~99% 사이로 예쁘게 나오게 하는 마법의 공식 ✨
-    const matchRate = Math.floor(60 + (avgRating / 5) * 39); 
-    document.getElementById('stat-match-rate').innerText = matchRate;
+    // 4. 취향 매칭률 — 둘 다 리뷰 쓴 영화 기준 별점 차이 평균으로 계산
+    if (ratingPairs.length > 0) {
+        const avgDiff = ratingPairs.reduce((sum, p) => sum + Math.abs(p.myRating - p.friendRating), 0) / ratingPairs.length;
+        // 차이가 0이면 100%, 차이가 5면 0%
+        const matchRate = Math.round(Math.max(0, 100 - (avgDiff / 5) * 100));
+        document.getElementById('stat-match-rate').innerText = matchRate;
+    } else {
+        document.getElementById('stat-match-rate').innerText = '-';
+    }
 
-    // 5. 서로 최고점을 준 영화 리스트 (별점 4.5 이상인 것들만 뱃지로 만들기)
-    const bestMovies = sharedMovies.filter(m => Number(m.myRating) >= 4.5).slice(0, 4);
-    const bestMoviesHtml = bestMovies.map(m => `
-        <div class="bg-white border border-rose-200 text-rose-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm">
-            ${m.title}
-        </div>
-    `).join('');
-    
-    document.getElementById('stat-best-movies').innerHTML = bestMoviesHtml || '<p class="text-xs text-gray-400 mt-2">아직 최고점을 준 영화가 없어요!</p>';
+    // 5. 별점이 극명하게 갈린 영화 (차이 1.5 이상)
+    const clashMovies = ratingPairs
+        .filter(p => Math.abs(p.myRating - p.friendRating) >= 1.5)
+        .sort((a,b) => Math.abs(b.myRating - b.friendRating) - Math.abs(a.myRating - a.friendRating));
+
+    document.getElementById('stat-clash-movies').innerHTML = clashMovies.length > 0
+        ? clashMovies.map(p => {
+            const higher = p.myRating > p.friendRating ? `${ME} ★${p.myRating}` : `${FRIEND} ★${p.friendRating}`;
+            const lower  = p.myRating < p.friendRating ? `${ME} ★${p.myRating}` : `${FRIEND} ★${p.friendRating}`;
+            return `
+            <div class="bg-white border border-orange-200 rounded-xl px-3 py-2 text-xs shadow-sm">
+                <p class="font-black text-gray-800 mb-1">${p.title}</p>
+                <p class="text-orange-500 font-bold">👍 ${higher} &nbsp;·&nbsp; 👎 ${lower}</p>
+            </div>`;
+        }).join('')
+        : '<p class="text-xs text-gray-400">아직 극명하게 갈린 영화가 없어요!</p>';
+
+    // 6. 둘 다 재밌게 본 영화 (둘 다 4.0 이상)
+    const bothLovedMovies = ratingPairs
+        .filter(p => p.myRating >= 4.0 && p.friendRating >= 4.0)
+        .sort((a,b) => (b.myRating + b.friendRating) - (a.myRating + a.friendRating));
+
+    document.getElementById('stat-both-loved').innerHTML = bothLovedMovies.length > 0
+        ? bothLovedMovies.map(p => `
+            <div class="bg-white border border-rose-200 text-rose-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5">
+                <span>🍿</span> ${p.title}
+                <span class="ml-auto text-gray-400 font-normal">★${p.myRating} · ★${p.friendRating}</span>
+            </div>`).join('')
+        : '<p class="text-xs text-gray-400">아직 둘 다 재밌게 본 영화가 없어요!</p>';
 }
 
 
