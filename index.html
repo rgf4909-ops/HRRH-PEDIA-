@@ -295,7 +295,7 @@ label:has(#review-spoiler) { display: none !important; }
                 <input type="search" id="search-input" oninput="handleSearch()" placeholder="제목으로 검색" class="w-40 sm:w-60 bg-gray-50 border border-gray-200 rounded-full px-5 py-2.5 pl-12 text-sm focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
             </div>
-            <button onclick="openLoginModal()" id="login-btn" class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-full text-sm font-bold text-gray-600 transition-all shadow-inner">
+            <button onclick="goMyProfile()" id="login-btn" class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded-full text-sm font-bold text-gray-600 transition-all shadow-inner">
                 <span id="login-avatar-preview" class="w-6 h-6 rounded-full bg-rose-100 text-rose-500 text-[10px] font-black flex items-center justify-center overflow-hidden shrink-0">?</span>
                 <span id="login-name-display" class="max-w-[60px] truncate">로그인</span>
             </button>
@@ -336,7 +336,7 @@ label:has(#review-spoiler) { display: none !important; }
         <button onclick="closeAnalysisModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-900 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 transition-colors z-10">✕</button>
 
         <div class="p-6 overflow-y-auto custom-scrollbar">
-        <h3 class="text-xl font-black text-gray-900 mb-4">💞 취향 분석</h3>
+        <h3 class="text-xl font-black text-gray-900 mb-4">취향 분석</h3>
         <div class="flex gap-2 flex-wrap mb-5" id="analysis-member-btns"></div>
 
         <div class="space-y-4">
@@ -387,14 +387,14 @@ label:has(#review-spoiler) { display: none !important; }
 <!-- 위시리스트 페이지 -->
 <div id="page-wishlist" class="hidden">
     <h2 class="text-2xl font-black text-gray-800 tracking-tight mb-2">보고싶어요 목록</h2>
-    <p class="text-sm text-gray-400 mb-6">우리 중 누군가 보고 싶다고 한 영화들이에요 🎬</p>
+    <p class="text-sm text-gray-400 mb-6">우리 중 누군가 보고 싶다고 한 영화들이에요.</p>
     <div id="wishlist-container" class="space-y-2 max-w-2xl"></div>
 </div>
 
 <!-- 프로필 페이지 -->
 <div id="page-profile" class="hidden">
-    <div id="profile-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8"></div>
-    <div id="profile-detail" class="hidden">
+    <div id="profile-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 max-w-3xl mx-auto"></div>
+    <div id="profile-detail" class="hidden max-w-2xl mx-auto">
         <button onclick="closeProfileDetail()" class="flex items-center gap-1.5 text-sm font-bold text-gray-400 hover:text-gray-700 mb-5 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
             전체 보기
@@ -2556,7 +2556,6 @@ function renderProfile(name) {
         if (r.movie.genre) r.movie.genre.split('#').map(g=>g.trim()).filter(g=>g).forEach(g=>{genreCounts[g]=(genreCounts[g]||0)+1;});
     });
     const topGenre = Object.keys(genreCounts).sort((a,b)=>genreCounts[b]-genreCounts[a])[0] || '-';
-
     const topMovies = [...myReviews].filter(r=>parseFloat(r.rating)>=4.5).sort((a,b)=>parseFloat(b.rating)-parseFloat(a.rating)).slice(0,6);
     const recentReviews = [...myReviews].sort((a,b)=>b.id-a.id).slice(0,5);
 
@@ -2567,21 +2566,20 @@ function renderProfile(name) {
         ? `<img src="${avatarSrc}" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow">`
         : `<div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-black ${ac(name)}">${name.charAt(0)}</div>`;
 
+    // ── 최고점 영화 포스터 ──
     const topPostersHTML = topMovies.length > 0
-        ? `<div class="grid grid-cols-3 sm:grid-cols-6 gap-3">${topMovies.map(r=>{
-            const p=r.movie;
-            return `<div class="flex flex-col gap-1 cursor-pointer" onclick="viewReviews(${p.id})">
+        ? `<div class="grid grid-cols-3 sm:grid-cols-6 gap-3">${topMovies.map(r=>{const p=r.movie;return `
+            <div class="flex flex-col gap-1 cursor-pointer" onclick="viewReviews(${p.id})">
                 ${p.poster?`<img src="${p.poster}" class="w-full aspect-[2/3] object-cover rounded-xl shadow-sm">`:`<div class="w-full aspect-[2/3] rounded-xl bg-gradient-to-br from-rose-100 to-fuchsia-100 flex items-center justify-center"><span class="text-[9px] font-black text-rose-400 text-center px-1">${p.title}</span></div>`}
                 <p class="text-[10px] font-black text-yellow-500 text-center">★${parseFloat(r.rating).toFixed(1)}</p>
             </div>`;}).join('')}</div>`
         : '<p class="text-xs text-gray-400">아직 4.5점 이상 준 영화가 없어요.</p>';
 
-    // 최근 리뷰 (코멘트 포함)
+    // ── 최근 리뷰 ──
     const recentHTML = recentReviews.length > 0
-        ? recentReviews.map(r=>{
-            const p=r.movie;
-            return `<div class="flex items-start gap-3 cursor-pointer hover:bg-gray-50 rounded-xl p-2 transition-colors" onclick="viewReviews(${p.id})">
-                ${p.poster?`<img src="${p.poster}" class="w-9 h-13 object-cover rounded-lg shrink-0" style="height:3.25rem">`:`<div class="w-9 rounded-lg bg-gradient-to-br from-rose-100 to-fuchsia-100 shrink-0 flex items-center justify-center" style="height:3.25rem"><span class="text-[7px] font-black text-rose-400 text-center px-0.5">${p.title}</span></div>`}
+        ? recentReviews.map(r=>{const p=r.movie;return `
+            <div class="flex items-start gap-3 cursor-pointer hover:bg-gray-50 rounded-xl p-2 transition-colors" onclick="viewReviews(${p.id})">
+                ${p.poster?`<img src="${p.poster}" class="w-9 object-cover rounded-lg shrink-0" style="height:3.25rem">`:`<div class="w-9 rounded-lg bg-gradient-to-br from-rose-100 to-fuchsia-100 shrink-0 flex items-center justify-center" style="height:3.25rem"><span class="text-[7px] font-black text-rose-400 text-center px-0.5">${p.title}</span></div>`}
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-0.5">
                         <p class="font-bold text-sm text-gray-800 truncate">${p.title}</p>
@@ -2593,18 +2591,84 @@ function renderProfile(name) {
             </div>`;}).join('')
         : '<p class="text-xs text-gray-400">아직 리뷰가 없어요.</p>';
 
+    // ── 3. 보고싶어요 2열 그리드 ──
+    const wantedHTML = wantedMovies.length > 0
+        ? `<div class="grid grid-cols-2 gap-3">${wantedMovies.map(movie => {
+            return `<div class="flex items-center gap-3 bg-gray-50 rounded-2xl p-3 cursor-pointer hover:bg-rose-50 transition-colors border border-gray-100" onclick="viewReviews(${movie.id})">
+                ${movie.poster
+                    ? `<img src="${movie.poster}" class="w-10 h-14 object-cover rounded-lg shrink-0 shadow-sm">`
+                    : `<div class="w-10 h-14 rounded-lg bg-gradient-to-br from-rose-100 to-fuchsia-100 shrink-0 flex items-center justify-center"><span class="text-[7px] font-black text-rose-400 text-center px-0.5">${movie.title}</span></div>`}
+                <p class="font-bold text-xs text-gray-800 line-clamp-3 leading-snug">${movie.title}</p>
+            </div>`;
+        }).join('')}</div>`
+        : '<p class="text-xs text-gray-400">아직 보고싶어요가 없어요.</p>';
+
+    // ── 4. 취향 분석 (나 vs 이 사람) ──
+    const me = localStorage.getItem('currentUser');
+    let tasteHTML = '';
+    if (me && me !== name) {
+        // 두 사람 다 리뷰 쓴 영화 기준
+        const pairs = movieData.map(movie => {
+            const revs = movie.reviews || [];
+            const myR = revs.find(r => r.user === me && !r.isWanted);
+            const theirR = revs.find(r => r.user === name && !r.isWanted);
+            if (!myR || !theirR) return null;
+            return { title: movie.title, poster: movie.poster||'', myRating: parseFloat(myR.rating), theirRating: parseFloat(theirR.rating), id: movie.id };
+        }).filter(Boolean);
+
+        if (pairs.length > 0) {
+            const avgDiff = pairs.reduce((s,p)=>s+Math.abs(p.myRating-p.theirRating),0)/pairs.length;
+            const matchRate = Math.round(Math.max(0, 100-(avgDiff/5)*100));
+            const bothLoved = pairs.filter(p=>p.myRating>=4.0&&p.theirRating>=4.0).sort((a,b)=>(b.myRating+b.theirRating)-(a.myRating+a.theirRating)).slice(0,4);
+            const clash = pairs.filter(p=>Math.abs(p.myRating-p.theirRating)>=1.5).sort((a,b)=>Math.abs(b.myRating-b.theirRating)-Math.abs(a.myRating-a.theirRating)).slice(0,4);
+
+            const miniPoster = (p, highlight) => {
+                const img = p.poster ? `<img src="${p.poster}" class="w-full h-full object-cover">` : `<div class="w-full h-full bg-gradient-to-br from-rose-100 to-fuchsia-100 flex items-center justify-center"><span class="text-[7px] font-black text-rose-400 text-center px-0.5">${p.title}</span></div>`;
+                const cA = highlight==='clash'&&p.myRating>p.theirRating?'text-orange-500':'text-rose-500';
+                const cB = highlight==='clash'&&p.theirRating>p.myRating?'text-orange-500':'text-rose-500';
+                return `<div class="flex flex-col gap-1 cursor-pointer" onclick="viewReviews(${p.id})">
+                    <div class="w-full aspect-[2/3] rounded-xl overflow-hidden shadow-sm">${img}</div>
+                    <p class="text-[8px] font-black text-gray-600 text-center truncate">${p.title}</p>
+                    <p class="text-[8px] text-center"><span class="${cA}">★${p.myRating}</span> · <span class="${cB}">★${p.theirRating}</span></p>
+                </div>`;
+            };
+
+            tasteHTML = `
+            <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+                <h4 class="text-sm font-black text-gray-700 mb-4">💞 ${me} × ${name} 취향 분석</h4>
+                <div class="flex gap-3 mb-5">
+                    <div class="flex-1 bg-gray-50 rounded-2xl p-4 text-center">
+                        <p class="text-2xl font-black text-gray-900">${matchRate}%</p>
+                        <p class="text-[10px] text-gray-400 font-bold mt-1">취향 매칭률</p>
+                    </div>
+                    <div class="flex-1 bg-rose-50 rounded-2xl p-4 text-center">
+                        <p class="text-2xl font-black text-rose-500">${pairs.length}</p>
+                        <p class="text-[10px] text-gray-400 font-bold mt-1">같이 본 영화</p>
+                    </div>
+                </div>
+                ${bothLoved.length>0?`<p class="text-xs font-black text-gray-600 mb-2">🍿 둘 다 재밌게 본 영화</p><div class="grid grid-cols-4 gap-2 mb-4">${bothLoved.map(p=>miniPoster(p,'loved')).join('')}</div>`:''}
+                ${clash.length>0?`<p class="text-xs font-black text-gray-600 mb-2">🔥 별점이 갈린 영화</p><div class="grid grid-cols-4 gap-2">${clash.map(p=>miniPoster(p,'clash')).join('')}</div>`:''}
+            </div>`;
+        } else {
+            tasteHTML = `<div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm text-center">
+                <p class="text-sm text-gray-400">아직 같이 본 영화가 없어요.</p>
+            </div>`;
+        }
+    }
+
     document.getElementById('profile-content').innerHTML = `
-    <div class="max-w-2xl space-y-6">
+    <div class="space-y-5">
         <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-            <div class="flex items-center gap-4 mb-6">${avatarHTML}
+            <div class="flex items-center gap-4 mb-5">${avatarHTML}
                 <div><h3 class="text-xl font-black text-gray-900">${name}</h3><p class="text-sm text-gray-400">보고싶어요 ${wantedMovies.length}편</p></div>
             </div>
-            <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="grid grid-cols-3 gap-3 text-center">
                 <div class="bg-gray-50 rounded-2xl p-4"><p class="text-2xl font-black text-gray-900">${totalMovies}</p><p class="text-xs text-gray-400 font-bold mt-1">본 영화</p></div>
                 <div class="bg-yellow-50 rounded-2xl p-4"><p class="text-2xl font-black text-yellow-500">★${avgRating}</p><p class="text-xs text-gray-400 font-bold mt-1">평균 별점</p></div>
                 <div class="bg-rose-50 rounded-2xl p-4"><p class="text-base font-black text-rose-500">${topGenre}</p><p class="text-xs text-gray-400 font-bold mt-1">최애 장르</p></div>
             </div>
         </div>
+        ${tasteHTML}
         <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
             <h4 class="text-sm font-black text-gray-700 mb-4">⭐ 최고점 영화</h4>${topPostersHTML}
         </div>
@@ -2612,8 +2676,24 @@ function renderProfile(name) {
             <h4 class="text-sm font-black text-gray-700 mb-3">🕐 최근 리뷰 & 코멘트</h4>
             <div class="space-y-1">${recentHTML}</div>
         </div>
+        <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+            <h4 class="text-sm font-black text-gray-700 mb-3">🎬 보고싶어요</h4>
+            ${wantedHTML}
+        </div>
     </div>`;
 }
+
+// 헤더 프로필 버튼 - 로그인 안 돼있으면 로그인, 돼있으면 내 프로필로 바로 이동
+function goMyProfile() {
+    const me = localStorage.getItem('currentUser');
+    if (!me) {
+        openLoginModal();
+    } else {
+        showPage('profile');
+        openProfileDetail(me);
+    }
+}
+
 
 // ============================================================
 // 🔐 간이 로그인
