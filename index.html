@@ -2085,10 +2085,11 @@ function calculateTasteStats() {
         const friendReview = reviews.find(r => r.user === FRIEND && !r.isWanted);
         return {
             title: m.title,
+            poster: m.poster || '',
             myRating: myReview ? parseFloat(myReview.rating) : null,
             friendRating: friendReview ? parseFloat(friendReview.rating) : null,
         };
-    }).filter(p => p.myRating !== null && p.friendRating !== null); // 둘 다 리뷰 쓴 것만
+    }).filter(p => p.myRating !== null && p.friendRating !== null);
 
     // 3. 최애 장르
     const genreCounts = {};
@@ -2117,16 +2118,33 @@ function calculateTasteStats() {
         .filter(p => Math.abs(p.myRating - p.friendRating) >= 1.5)
         .sort((a,b) => Math.abs(b.myRating - b.friendRating) - Math.abs(a.myRating - a.friendRating));
 
+    const posterCardHTML = (p, labelA, ratingA, labelB, ratingB, highlight) => {
+        const posterHTML = p.poster
+            ? `<img src="${p.poster}" alt="${p.title}" class="w-full h-full object-cover">`
+            : `<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-fuchsia-100 p-2 text-center">
+                <span class="text-[10px] font-black text-rose-400 leading-tight">${p.title}</span>
+               </div>`;
+        return `
+        <div class="flex items-center gap-3 bg-white border ${highlight === 'clash' ? 'border-orange-100' : 'border-rose-100'} rounded-2xl p-3 shadow-sm">
+            <div class="w-12 h-[72px] rounded-xl overflow-hidden shrink-0 shadow-sm">${posterHTML}</div>
+            <div class="flex-1 min-w-0">
+                <p class="font-black text-gray-800 text-xs truncate mb-1.5">${p.title}</p>
+                <div class="flex flex-col gap-0.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-gray-400">${labelA}</span>
+                        <span class="text-[11px] font-black ${highlight === 'clash' && ratingA > ratingB ? 'text-orange-500' : highlight === 'loved' ? 'text-rose-500' : 'text-gray-500'}">★ ${ratingA}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-gray-400">${labelB}</span>
+                        <span class="text-[11px] font-black ${highlight === 'clash' && ratingB > ratingA ? 'text-orange-500' : highlight === 'loved' ? 'text-rose-500' : 'text-gray-500'}">★ ${ratingB}</span>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    };
+
     document.getElementById('stat-clash-movies').innerHTML = clashMovies.length > 0
-        ? clashMovies.map(p => {
-            const higher = p.myRating > p.friendRating ? `${ME} ★${p.myRating}` : `${FRIEND} ★${p.friendRating}`;
-            const lower  = p.myRating < p.friendRating ? `${ME} ★${p.myRating}` : `${FRIEND} ★${p.friendRating}`;
-            return `
-            <div class="bg-white border border-orange-200 rounded-xl px-3 py-2 text-xs shadow-sm">
-                <p class="font-black text-gray-800 mb-1">${p.title}</p>
-                <p class="text-orange-500 font-bold">👍 ${higher} &nbsp;·&nbsp; 👎 ${lower}</p>
-            </div>`;
-        }).join('')
+        ? clashMovies.map(p => posterCardHTML(p, ME, p.myRating, FRIEND, p.friendRating, 'clash')).join('')
         : '<p class="text-xs text-gray-400">아직 극명하게 갈린 영화가 없어요!</p>';
 
     // 6. 둘 다 재밌게 본 영화 (둘 다 4.0 이상)
@@ -2135,11 +2153,7 @@ function calculateTasteStats() {
         .sort((a,b) => (b.myRating + b.friendRating) - (a.myRating + a.friendRating));
 
     document.getElementById('stat-both-loved').innerHTML = bothLovedMovies.length > 0
-        ? bothLovedMovies.map(p => `
-            <div class="bg-white border border-rose-200 text-rose-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5">
-                <span>🍿</span> ${p.title}
-                <span class="ml-auto text-gray-400 font-normal">★${p.myRating} · ★${p.friendRating}</span>
-            </div>`).join('')
+        ? bothLovedMovies.map(p => posterCardHTML(p, ME, p.myRating, FRIEND, p.friendRating, 'loved')).join('')
         : '<p class="text-xs text-gray-400">아직 둘 다 재밌게 본 영화가 없어요!</p>';
 }
 
