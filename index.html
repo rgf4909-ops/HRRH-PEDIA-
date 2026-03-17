@@ -274,10 +274,16 @@ label:has(#review-spoiler) { display: none !important; }
                 <img src="./logo.png" alt="MOVIE INUKAN" class="h-10 md:h-11 w-auto object-contain" onerror="this.src='https://via.placeholder.com/150x50?text=LOGO'">
             </a>
             
-            <div class="flex items-center gap-4 ml-6 sm:ml-8 mt-1">
-                <button class="text-[16px] sm:text-[17px] font-black text-gray-900 tracking-tight cursor-pointer">홈</button>
+            <div class="flex items-center gap-3 sm:gap-4 ml-4 sm:ml-8 mt-1">
+                <button onclick="showPage('home')" id="nav-home" class="text-[14px] sm:text-[17px] font-black text-gray-900 tracking-tight cursor-pointer">홈</button>
                 <span class="text-gray-200 text-sm pb-0.5">|</span>
-                <button onclick="openAnalysisModal()" class="text-[16px] sm:text-[17px] font-bold text-gray-400 hover:text-gray-700 transition-colors tracking-tight cursor-pointer">취향분석</button>
+                <button onclick="showPage('feed')" id="nav-feed" class="text-[14px] sm:text-[17px] font-bold text-gray-400 hover:text-gray-700 transition-colors tracking-tight cursor-pointer">피드</button>
+                <span class="text-gray-200 text-sm pb-0.5">|</span>
+                <button onclick="showPage('wishlist')" id="nav-wishlist" class="text-[14px] sm:text-[17px] font-bold text-gray-400 hover:text-gray-700 transition-colors tracking-tight cursor-pointer">위시리스트</button>
+                <span class="text-gray-200 text-sm pb-0.5">|</span>
+                <button onclick="showPage('profile')" id="nav-profile" class="text-[14px] sm:text-[17px] font-bold text-gray-400 hover:text-gray-700 transition-colors tracking-tight cursor-pointer">프로필</button>
+                <span class="text-gray-200 text-sm pb-0.5">|</span>
+                <button onclick="openAnalysisModal()" class="text-[14px] sm:text-[17px] font-bold text-gray-400 hover:text-gray-700 transition-colors tracking-tight cursor-pointer">취향분석</button>
             </div>
         </div>
 
@@ -296,6 +302,8 @@ label:has(#review-spoiler) { display: none !important; }
 
 <main class="max-w-[1300px] mx-auto px-5 pt-8">
 
+<!-- 홈 페이지 -->
+<div id="page-home">
 <div class="flex flex-wrap items-center gap-2 mb-6">
     <h2 class="text-2xl font-black text-gray-800 tracking-tight mr-auto">평가한 작품들</h2>
     
@@ -307,7 +315,7 @@ label:has(#review-spoiler) { display: none !important; }
         <option value="title">가나다순</option>
         <option value="myRatingDesc">나의 별점 높은 순</option>
         <option value="myRatingAsc">나의 별점 낮은 순</option>
-        <option value="withHerung">헤렁이 함께 본 영화</option>
+        <option value="withHerung">🫶 헤렁이와 함께 본 영화</option>
     </select>
 </div>
 
@@ -317,7 +325,7 @@ label:has(#review-spoiler) { display: none !important; }
         <button onclick="closeAnalysisModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-900 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 transition-colors z-10">✕</button>
 
         <div class="p-6 overflow-y-auto custom-scrollbar">
-        <h3 class="text-xl font-black text-gray-900 mb-6">취향 분석</h3>
+        <h3 class="text-xl font-black text-gray-900 mb-6">🫶 헤렁이와의 취향 분석</h3>
 
         <div class="space-y-4">
             <div class="bg-rose-50 rounded-2xl p-5 border border-rose-100 flex items-center justify-between">
@@ -347,7 +355,7 @@ label:has(#review-spoiler) { display: none !important; }
             </div>
 
             <div class="pt-4 border-t border-gray-100">
-                <p class="text-gray-700 text-sm font-bold mb-3">🔥 평가가 극명하게 갈린 영화 <span class="text-[10px] text-gray-400 font-normal">(차이 ★1.5 이상)</span></p>
+                <p class="text-gray-700 text-sm font-bold mb-3">🔥 별점이 극명하게 갈린 영화 <span class="text-[10px] text-gray-400 font-normal">(차이 ★1.5 이상)</span></p>
                 <div id="stat-clash-movies" class="flex flex-col gap-2"></div>
             </div>
             </div>
@@ -356,6 +364,27 @@ label:has(#review-spoiler) { display: none !important; }
 </div>
     
     <div id="movie-container"></div>
+</div><!-- /page-home -->
+
+<!-- 피드 페이지 -->
+<div id="page-feed" class="hidden">
+    <h2 class="text-2xl font-black text-gray-800 tracking-tight mb-6">최근 활동 피드</h2>
+    <div id="feed-container" class="space-y-3 max-w-2xl"></div>
+</div>
+
+<!-- 위시리스트 페이지 -->
+<div id="page-wishlist" class="hidden">
+    <h2 class="text-2xl font-black text-gray-800 tracking-tight mb-2">보고싶어요 목록</h2>
+    <p class="text-sm text-gray-400 mb-6">우리 중 누군가 보고 싶다고 한 영화들이에요 🎬</p>
+    <div id="wishlist-container" class="space-y-2 max-w-2xl"></div>
+</div>
+
+<!-- 프로필 페이지 -->
+<div id="page-profile" class="hidden">
+    <div class="flex flex-wrap gap-3 mb-8" id="profile-tabs"></div>
+    <div id="profile-content"></div>
+</div>
+
 </main>
 
 <div id="add-movie-modal" class="fixed inset-0 z-[60] hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
@@ -421,7 +450,7 @@ label:has(#review-spoiler) { display: none !important; }
                 </div>
                 <label class="flex items-center gap-3 cursor-pointer bg-rose-50 border border-rose-100 px-4 py-3 rounded-2xl hover:bg-rose-100 transition-colors">
                     <input type="checkbox" id="new-movie-with-herung" class="accent-rose-500 w-4 h-4 cursor-pointer">
-                    <span class="text-sm font-bold text-rose-500">헤렁이 함께 본 영화</span>
+                    <span class="text-sm font-bold text-rose-500">🫶 헤렁이와 함께 본 영화</span>
                 </label>
                 <button type="submit" id="movie-form-btn" class="w-full py-4 rounded-2xl bg-gray-900 hover:bg-black text-white font-bold text-base shadow-xl shadow-gray-200 transition-all mt-4">영화 저장하기 ✨</button>
             </form>
@@ -738,6 +767,9 @@ d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 11.996c0 2.29.982
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+
+    // ★ 멤버 목록 — 나중에 추가될 때 여기에만 넣으면 돼요
+    const MEMBERS = ['차주혜', '참치', '헤리미', '부렁'];
 
     let movieData = [];
     let currentMovieId = null;
@@ -2211,6 +2243,264 @@ function calculateTasteStats() {
     );
 }
 
+
+// ============================================================
+// 🗂️ 페이지 전환
+// ============================================================
+function showPage(page) {
+    ['home','feed','wishlist','profile'].forEach(p => {
+        document.getElementById('page-' + p).classList.toggle('hidden', p !== page);
+        const btn = document.getElementById('nav-' + p);
+        if (btn) {
+            btn.classList.toggle('font-black', p === page);
+            btn.classList.toggle('text-gray-900', p === page);
+            btn.classList.toggle('font-bold', p !== page);
+            btn.classList.toggle('text-gray-400', p !== page);
+        }
+    });
+    if (page === 'feed') renderFeed();
+    if (page === 'wishlist') renderWishlist();
+    if (page === 'profile') renderProfileTabs();
+}
+
+// ============================================================
+// 📰 1. 활동 피드
+// ============================================================
+function renderFeed() {
+    const container = document.getElementById('feed-container');
+    // 모든 영화의 모든 리뷰를 시간순으로 펼치기
+    let allReviews = [];
+    movieData.forEach(movie => {
+        (movie.reviews || []).forEach(r => {
+            allReviews.push({ ...r, movieTitle: movie.title, moviePoster: movie.poster || '', movieId: movie.id });
+        });
+    });
+    // 최신순 정렬 (id = Date.now())
+    allReviews.sort((a, b) => b.id - a.id);
+    allReviews = allReviews.slice(0, 50); // 최대 50개
+
+    if (allReviews.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-sm py-10 text-center">아직 활동이 없어요.</p>';
+        return;
+    }
+
+    const avatarColors = ['bg-rose-100 text-rose-500','bg-violet-100 text-violet-500','bg-sky-100 text-sky-500','bg-amber-100 text-amber-500','bg-emerald-100 text-emerald-500'];
+    function avatarColor(name) {
+        let h = 0; for (let c of name) h += c.charCodeAt(0);
+        return avatarColors[h % avatarColors.length];
+    }
+
+    container.innerHTML = allReviews.map(r => {
+        const isWanted = r.isWanted;
+        const stars = isWanted ? '' : `<span class="text-yellow-500 font-black text-xs">★ ${parseFloat(r.rating).toFixed(1)}</span>`;
+        const badge = isWanted
+            ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-50 text-pink-500 border border-pink-100">보고싶어요</span>'
+            : (r.recommend === 'up'
+                ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-100">추천</span>'
+                : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-100">비추천</span>');
+        const posterHTML = r.moviePoster
+            ? `<img src="${r.moviePoster}" class="w-10 h-14 object-cover rounded-lg shrink-0 shadow-sm">`
+            : `<div class="w-10 h-14 rounded-lg shrink-0 bg-gradient-to-br from-rose-100 to-fuchsia-100 flex items-center justify-center"><span class="text-[8px] font-black text-rose-400 text-center leading-tight px-0.5">${r.movieTitle}</span></div>`;
+        return `
+        <div class="flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="playSound('click'); viewReviews(${r.movieId})">
+            ${posterHTML}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${avatarColor(r.user)}">${r.user.charAt(0)}</div>
+                    <span class="font-black text-sm text-gray-800">${r.user}</span>
+                    <span class="text-xs text-gray-400">${r.date || ''}</span>
+                    ${stars}
+                    ${badge}
+                </div>
+                <p class="text-xs text-gray-500 mb-0.5">📽️ <span class="font-bold text-gray-700">${r.movieTitle}</span></p>
+                ${r.title ? `<p class="text-sm font-bold text-gray-800 truncate">${r.title}</p>` : ''}
+                ${r.text ? `<p class="text-xs text-gray-600 line-clamp-2 mt-0.5">${r.text}</p>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ============================================================
+// 🎯 2. 위시리스트
+// ============================================================
+function renderWishlist() {
+    const container = document.getElementById('wishlist-container');
+    // 각 영화에서 isWanted 리뷰 수집
+    let wishes = [];
+    movieData.forEach(movie => {
+        const wantedReviews = (movie.reviews || []).filter(r => r.isWanted);
+        if (wantedReviews.length > 0) {
+            wishes.push({ movie, wantedBy: wantedReviews.map(r => r.user) });
+        }
+    });
+    // 많이 원하는 순
+    wishes.sort((a, b) => b.wantedBy.length - a.wantedBy.length);
+
+    if (wishes.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-sm py-10 text-center">아직 보고싶어요가 없어요.</p>';
+        return;
+    }
+
+    container.innerHTML = wishes.map(({ movie, wantedBy }) => {
+        const posterHTML = movie.poster
+            ? `<img src="${movie.poster}" class="w-12 h-[72px] object-cover rounded-xl shrink-0 shadow-sm">`
+            : `<div class="w-12 h-[72px] rounded-xl shrink-0 bg-gradient-to-br from-rose-100 to-fuchsia-100 flex items-center justify-center"><span class="text-[8px] font-black text-rose-400 text-center leading-tight px-1">${movie.title}</span></div>`;
+        const badges = wantedBy.map(u =>
+            `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-500 border border-rose-100">${u}</span>`
+        ).join('');
+        const allWant = MEMBERS.every(m => wantedBy.includes(m));
+        return `
+        <div class="flex items-center gap-4 bg-white rounded-2xl p-4 shadow-sm border ${allWant ? 'border-rose-200' : 'border-gray-100'} cursor-pointer hover:shadow-md transition-shadow" onclick="playSound('click'); viewReviews(${movie.id})">
+            ${posterHTML}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                    ${allWant ? '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500 text-white">전원 보고싶어요 🔥</span>' : ''}
+                </div>
+                <p class="font-black text-gray-800 truncate mb-2">${movie.title}${movie.releaseYear ? ` <span class="text-xs text-gray-400 font-normal">(${movie.releaseYear})</span>` : ''}</p>
+                <div class="flex flex-wrap gap-1">${badges}</div>
+            </div>
+            <span class="text-2xl font-black text-rose-300 shrink-0">${wantedBy.length}</span>
+        </div>`;
+    }).join('');
+}
+
+// ============================================================
+// 👤 3. 프로필
+// ============================================================
+function renderProfileTabs() {
+    const tabsEl = document.getElementById('profile-tabs');
+    tabsEl.innerHTML = MEMBERS.map((name, i) => `
+        <button onclick="renderProfile('${name}')" id="profile-tab-${i}"
+            class="px-5 py-2.5 rounded-2xl text-sm font-bold transition-all ${i === 0 ? 'bg-gray-900 text-white shadow-md' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'}">
+            ${name}
+        </button>`).join('');
+    renderProfile(MEMBERS[0]);
+}
+
+function renderProfile(name) {
+    // 탭 활성화
+    MEMBERS.forEach((m, i) => {
+        const btn = document.getElementById('profile-tab-' + i);
+        if (!btn) return;
+        const active = m === name;
+        btn.className = `px-5 py-2.5 rounded-2xl text-sm font-bold transition-all ${active ? 'bg-gray-900 text-white shadow-md' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'}`;
+    });
+
+    const myReviews = [];
+    movieData.forEach(movie => {
+        (movie.reviews || []).forEach(r => {
+            if (r.user === name && !r.isWanted) {
+                myReviews.push({ ...r, movie });
+            }
+        });
+    });
+    const wantedMovies = [];
+    movieData.forEach(movie => {
+        (movie.reviews || []).forEach(r => {
+            if (r.user === name && r.isWanted) wantedMovies.push(movie);
+        });
+    });
+
+    const totalMovies = myReviews.length;
+    const avgRating = totalMovies > 0
+        ? (myReviews.reduce((s, r) => s + parseFloat(r.rating || 0), 0) / totalMovies).toFixed(1)
+        : '-';
+
+    // 최애 장르
+    const genreCounts = {};
+    myReviews.forEach(r => {
+        if (r.movie.genre) {
+            r.movie.genre.split('#').map(g => g.trim()).filter(g => g).forEach(g => {
+                genreCounts[g] = (genreCounts[g] || 0) + 1;
+            });
+        }
+    });
+    const topGenre = Object.keys(genreCounts).sort((a,b) => genreCounts[b]-genreCounts[a])[0] || '-';
+
+    // 최고점 준 영화 (4.5↑)
+    const topMovies = [...myReviews]
+        .filter(r => parseFloat(r.rating) >= 4.5)
+        .sort((a,b) => parseFloat(b.rating) - parseFloat(a.rating))
+        .slice(0, 6);
+
+    // 최근 리뷰
+    const recentReviews = [...myReviews]
+        .sort((a,b) => b.id - a.id)
+        .slice(0, 5);
+
+    const avatarColors = ['bg-rose-100 text-rose-500','bg-violet-100 text-violet-500','bg-sky-100 text-sky-500','bg-amber-100 text-amber-500'];
+    function avatarColor(n) { let h=0; for(let c of n) h+=c.charCodeAt(0); return avatarColors[h%avatarColors.length]; }
+
+    const topPostersHTML = topMovies.length > 0
+        ? `<div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+            ${topMovies.map(r => {
+                const p = r.movie;
+                return `<div class="flex flex-col gap-1 cursor-pointer" onclick="viewReviews(${p.id})">
+                    ${p.poster
+                        ? `<img src="${p.poster}" class="w-full aspect-[2/3] object-cover rounded-xl shadow-sm">`
+                        : `<div class="w-full aspect-[2/3] rounded-xl bg-gradient-to-br from-rose-100 to-fuchsia-100 flex items-center justify-center"><span class="text-[9px] font-black text-rose-400 text-center px-1">${p.title}</span></div>`}
+                    <p class="text-[10px] font-black text-yellow-500 text-center">★ ${parseFloat(r.rating).toFixed(1)}</p>
+                </div>`;
+            }).join('')}
+           </div>`
+        : '<p class="text-xs text-gray-400">아직 4.5점 이상 준 영화가 없어요.</p>';
+
+    const recentHTML = recentReviews.length > 0
+        ? recentReviews.map(r => {
+            const p = r.movie;
+            return `<div class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-xl p-2 transition-colors" onclick="viewReviews(${p.id})">
+                ${p.poster
+                    ? `<img src="${p.poster}" class="w-8 h-12 object-cover rounded-lg shrink-0">`
+                    : `<div class="w-8 h-12 rounded-lg bg-gradient-to-br from-rose-100 to-fuchsia-100 shrink-0 flex items-center justify-center"><span class="text-[7px] font-black text-rose-400 text-center px-0.5">${p.title}</span></div>`}
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-sm text-gray-800 truncate">${p.title}</p>
+                    ${r.title ? `<p class="text-xs text-gray-500 truncate italic">${r.title}</p>` : ''}
+                </div>
+                <span class="text-xs font-black text-yellow-500 shrink-0">★ ${parseFloat(r.rating).toFixed(1)}</span>
+            </div>`;
+        }).join('')
+        : '<p class="text-xs text-gray-400">아직 리뷰가 없어요.</p>';
+
+    document.getElementById('profile-content').innerHTML = `
+    <div class="max-w-2xl space-y-6">
+        <!-- 기본 통계 -->
+        <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-black ${avatarColor(name)}">${name.charAt(0)}</div>
+                <div>
+                    <h3 class="text-xl font-black text-gray-900">${name}</h3>
+                    <p class="text-sm text-gray-400">보고싶어요 ${wantedMovies.length}편</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <div class="bg-gray-50 rounded-2xl p-4">
+                    <p class="text-2xl font-black text-gray-900">${totalMovies}</p>
+                    <p class="text-xs text-gray-400 font-bold mt-1">본 영화</p>
+                </div>
+                <div class="bg-yellow-50 rounded-2xl p-4">
+                    <p class="text-2xl font-black text-yellow-500">★ ${avgRating}</p>
+                    <p class="text-xs text-gray-400 font-bold mt-1">평균 별점</p>
+                </div>
+                <div class="bg-rose-50 rounded-2xl p-4">
+                    <p class="text-lg font-black text-rose-500">${topGenre}</p>
+                    <p class="text-xs text-gray-400 font-bold mt-1">최애 장르</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 최고점 영화 -->
+        <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+            <h4 class="text-sm font-black text-gray-700 mb-4">⭐ 최고점을 준 영화</h4>
+            ${topPostersHTML}
+        </div>
+
+        <!-- 최근 리뷰 -->
+        <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+            <h4 class="text-sm font-black text-gray-700 mb-3">🕐 최근 리뷰</h4>
+            <div class="space-y-1">${recentHTML}</div>
+        </div>
+    </div>`;
+}
 
 </script>
 </body>
