@@ -387,7 +387,7 @@ label:has(#review-spoiler) { display: none !important; }
 <!-- 위시리스트 페이지 -->
 <div id="page-wishlist" class="hidden">
     <h2 class="text-2xl font-black text-gray-800 tracking-tight mb-2">보고싶어요 목록</h2>
-    <p class="text-sm text-gray-400 mb-6">우리 중 누군가 보고 싶다고 한 영화들이에요.</p>
+    <p class="text-sm text-gray-400 mb-6">우리 중 누군가 보고 싶다고 한 영화들이에요 🎬</p>
     <div id="wishlist-container" class="space-y-2 max-w-2xl"></div>
 </div>
 
@@ -468,7 +468,7 @@ label:has(#review-spoiler) { display: none !important; }
                 </div>
                 <label class="flex items-center gap-3 cursor-pointer bg-rose-50 border border-rose-100 px-4 py-3 rounded-2xl hover:bg-rose-100 transition-colors">
                     <input type="checkbox" id="new-movie-with-herung" class="accent-rose-500 w-4 h-4 cursor-pointer">
-                    <span class="text-sm font-bold text-rose-500">헤렁이 함께 본 영화</span>
+                    <span class="text-sm font-bold text-rose-500">헤렁이와 함께 본 영화</span>
                 </label>
                 <button type="submit" id="movie-form-btn" class="w-full py-4 rounded-2xl bg-gray-900 hover:bg-black text-white font-bold text-base shadow-xl shadow-gray-200 transition-all mt-4">영화 저장하기 ✨</button>
             </form>
@@ -754,9 +754,8 @@ d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 11.996c0 2.29.982
 <!-- 간이 로그인 모달 -->
 <div id="login-modal" class="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-xs rounded-3xl p-7 shadow-2xl text-center">
-        <div class="text-4xl mb-3">🎬</div>
-        <h4 class="text-lg font-black text-gray-900 mb-1">혜렁피디아</h4>
-        <p class="text-sm text-gray-400 mb-5">나는 누구?</p>
+        <img src="./logo.png" alt="logo" class="h-16 w-auto mx-auto mb-3">
+        <p class="text-sm text-gray-400 mb-5">접속하실 프로필을 선택해주세요.</p>
         <div class="grid grid-cols-2 gap-2 mb-4" id="login-member-btns">
             <button onclick="selectUser('차주혜')" id="login-btn-차주혜" class="py-3 rounded-2xl text-sm font-bold border bg-white text-gray-600 border-gray-200 hover:bg-gray-50 transition-all">차주혜</button>
             <button onclick="selectUser('참치')" id="login-btn-참치" class="py-3 rounded-2xl text-sm font-bold border bg-white text-gray-600 border-gray-200 hover:bg-gray-50 transition-all">참치</button>
@@ -767,7 +766,7 @@ d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 11.996c0 2.29.982
             <input type="url" id="login-avatar-input" placeholder="🖼️ 프로필 이미지 URL (선택)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:ring-2 focus:ring-rose-100 text-center">
         </div>
         <p class="text-[10px] text-gray-300 mb-4">선택한 이름으로 리뷰가 저장돼요</p>
-        <button onclick="confirmLogin()" class="w-full py-3 bg-gray-900 hover:bg-black text-white font-bold rounded-2xl text-sm transition-all">입장하기 🎬</button>
+        <button onclick="confirmLogin()" class="w-full py-3 bg-gray-900 hover:bg-black text-white font-bold rounded-2xl text-sm transition-all">로그인</button>
     </div>
 </div>
 
