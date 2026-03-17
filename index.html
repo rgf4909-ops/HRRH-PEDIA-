@@ -217,12 +217,21 @@ overflow-y:auto;
 </style>
 </head>
 <body class="min-h-screen pb-20">
-
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
     <div class="max-w-[1300px] mx-auto px-5 py-4 flex items-center justify-between">
-        <a href="." class="flex items-center no-underline">
-            <img src="./logo.png" alt="MOVIE INUKAN" class="h-10 md:h-11 w-auto object-contain" onerror="this.src='https://via.placeholder.com/150x50?text=LOGO'">
-        </a>
+        
+        <div class="flex items-center">
+            <a href="." class="flex items-center no-underline">
+                <img src="./logo.png" alt="MOVIE INUKAN" class="h-10 md:h-11 w-auto object-contain" onerror="this.src='https://via.placeholder.com/150x50?text=LOGO'">
+            </a>
+            
+            <div class="flex items-center gap-4 ml-6 sm:ml-8 mt-1">
+                <button class="text-[16px] sm:text-[17px] font-black text-gray-900 tracking-tight cursor-pointer">홈</button>
+                <span class="text-gray-200 text-sm pb-0.5">|</span>
+                <button onclick="openAnalysisModal()" class="text-[16px] sm:text-[17px] font-bold text-gray-400 hover:text-gray-700 transition-colors tracking-tight cursor-pointer">취향분석</button>
+            </div>
+        </div>
+
         <div class="flex items-center gap-4">
             <div class="relative search-input-group">
                 <input type="search" id="search-input" oninput="handleSearch()" placeholder="제목으로 검색" class="w-40 sm:w-60 bg-gray-50 border border-gray-200 rounded-full px-5 py-2.5 pl-12 text-sm focus:outline-none focus:ring-2 focus:ring-rose-100 transition-all">
@@ -232,21 +241,71 @@ overflow-y:auto;
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
             </button>
         </div>
+
     </div>
 </header>
-<main class="max-w-5xl mx-auto p-6">
-    <div class="flex justify-between items-end mb-4 mt-2">
-        <h2 class="text-2xl font-black text-gray-800 tracking-tight">평가한 작품들 </h2>
-        <select id="main-sort-select" onchange="handleSearch()" class="bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold text-gray-600 outline-none cursor-pointer hover:bg-gray-50 transition-colors shadow-sm">
-            <option value="dateDesc">최신순</option>
-            <option value="dateAsc">오래된 순</option>
-            <option value="ratingDesc" >별점 높은순</option>
-            <option value="ratingAsc">별점 낮은순</option>
-            <option value="title">가나다순</option>
-            <option value="myRatingDesc">나의 별점 높은 순</option>
-            <option value="myRatingAsc">나의 별점 낮은 순</option>
-        </select>
+
+<main class="max-w-[1300px] mx-auto px-5 pt-8">
+
+<div class="flex flex-wrap items-center gap-2 mb-6">
+    <h2 class="text-2xl font-black text-gray-800 tracking-tight mr-auto">평가한 작품들</h2>
+    
+    <select id="friend-filter-select" onchange="handleSearch()" class="bg-rose-50 border border-rose-100 rounded-xl px-3 py-2 text-sm font-bold text-rose-600 outline-none cursor-pointer hover:bg-rose-100 transition-colors shadow-sm">
+        <option value="all">전체 보기</option>
+        <option value="참치">부렁이와 함께 본 영화</option>
+        <option value="헤리미">헤리미와 함께 본 영화</option>
+    </select>
+
+    <select id="main-sort-select" onchange="handleSearch()" class="bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold text-gray-600 outline-none cursor-pointer hover:bg-gray-50 transition-colors shadow-sm">
+        <option value="dateDesc">최신순</option>
+        <option value="dateAsc">오래된 순</option>
+        <option value="ratingDesc">별점 높은순</option>
+        <option value="ratingAsc">별점 낮은순</option>
+        <option value="title">가나다순</option>
+        <option value="myRatingDesc">나의 별점 높은 순</option>
+        <option value="myRatingAsc">나의 별점 낮은 순</option>
+    </select>
+</div>
+
+<div id="analysis-modal" class="fixed inset-0 z-[80] hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+        
+        <button onclick="closeAnalysisModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-900 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 transition-colors">✕</button>
+
+        <h3 class="text-xl font-black text-gray-900 mb-6">취향 분석</h3>
+
+        <div class="space-y-4">
+            <div class="bg-rose-50 rounded-2xl p-5 border border-rose-100 flex items-center justify-between">
+                <div>
+                    <p class="text-rose-500 text-xs font-bold mb-1">함께한 시간</p>
+                    <p class="text-gray-900 font-black text-lg">총 <span id="stat-total-movies" class="text-rose-600 text-2xl">0</span>편의 영화</p>
+                </div>
+                <div class="text-4xl">🍿</div>
+            </div>
+
+            <div class="flex gap-4">
+                <div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-100 text-center">
+                    <p class="text-gray-500 text-xs font-bold mb-1">취향 매칭률</p>
+                    <p class="text-gray-900 font-black text-2xl"><span id="stat-match-rate">0</span>%</p>
+                    <p class="text-[10px] text-gray-400 mt-1">서로 별점이 비슷할수록 올라가요!</p>
+                </div>
+                
+                <div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-100 text-center">
+                    <p class="text-gray-500 text-xs font-bold mb-1">우리의 최애 장르</p>
+                    <p id="stat-top-genre" class="text-gray-900 font-black text-lg mt-1">액션</p>
+                    <p class="text-[10px] text-gray-400 mt-1">같이 가장 많이 본 장르</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-gray-700 text-sm font-bold mb-3">서로 최고점을 준 영화 🏆</p>
+                <div id="stat-best-movies" class="flex flex-wrap gap-2">
+                    </div>
+            </div>
+        </div>
+        
     </div>
+</div>
     
     <div id="movie-container"></div>
 </main>
@@ -348,7 +407,10 @@ overflow-y:auto;
                 <div class="flex gap-6 border-b border-gray-100 w-full pt-1">
                     <button onclick="switchRightTab('my')" id="right-tab-my" class="pb-3 text-[15px] font-bold text-gray-900 border-b-2 border-gray-900 transition-colors uppercase tracking-widest">리뷰</button>
                     <button onclick="switchRightTab('critics')" id="right-tab-critics" class="pb-3 text-[15px] font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition-colors uppercase tracking-widest">평론</button>
+                    <button onclick="switchRightTab('quotes')" id="right-tab-quotes"
+class="pb-3 text-[15px] font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition-colors uppercase tracking-widest">명대사</button>
                     <button onclick="switchRightTab('column')" id="right-tab-column" class="pb-3 text-[15px] font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition-colors uppercase tracking-widest">칼럼</button>
+
                     
                     <div class="ml-auto flex gap-2 pb-3 items-center mr-6">
                         <button onclick="editCurrentMovie()" class="text-[11px] font-bold text-gray-400 hover:text-blue-500 transition-colors uppercase tracking-widest">수정</button>
@@ -479,6 +541,30 @@ placeholder="이 작품에 대한 생각을 자유롭게 표현해주세요.">
                     <button onclick="addCritic()" class="w-full bg-gray-900 hover:bg-black text-white rounded-xl py-3 text-sm font-bold shadow-md shadow-gray-200 transition-all">평론 등록하기</button>
                 </div>
             </div>
+
+<div id="right-content-quotes" class="hidden flex-col flex-1 min-h-0">
+    <div class="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-4 mb-4" id="quotes-list"></div>
+
+    <div class="pt-4 border-t border-gray-100 shrink-0 pr-4">
+        <h4 class="text-sm font-bold text-gray-700 mb-3">새 명대사 추가</h4>
+
+        <div class="flex gap-2 mb-2 flex-wrap sm:flex-nowrap">
+            <input type="text" id="new-quote-author" placeholder="등장인물"
+            class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none">
+
+            <input type="url" id="new-quote-avatar" placeholder="이미지 URL(선택)"
+            class="w-full sm:w-1/3 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none">
+        </div>
+
+        <textarea id="new-quote-text" placeholder="명대사 입력"
+        class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm mb-3 h-20 resize-none"></textarea>
+
+        <button onclick="addQuote()"
+        class="w-full bg-gray-900 hover:bg-black text-white rounded-xl py-3 text-sm font-bold">
+        명대사 등록하기
+        </button>
+    </div>
+</div>
 
             <div id="right-content-column" class="hidden flex-col flex-1 min-h-0">
                 <div id="column-list-view" class="flex flex-col flex-1 min-h-0">
@@ -725,28 +811,39 @@ d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 11.996c0 2.29.982
         return html;
     }
 
-    // 🌟 실시간 검색 필터링 및 정렬 처리
-    function handleSearch() {
-        const query = document.getElementById('search-input').value.trim().toLowerCase();
-        let filteredData = movieData;
-        if (query) {
-            filteredData = movieData.filter(m => m.title.toLowerCase().includes(query));
-        }
-        renderMovies(filteredData);
+   // 🌟 실시간 검색, 친구 필터링 및 정렬 처리 통합
+function handleSearch() {
+    // 1. 화면에 있는 입력값 3대장 다 가져오기
+    const query = document.getElementById('search-input').value.trim().toLowerCase();
+    const friendVal = document.getElementById('friend-filter-select').value;
+    const sortVal = document.getElementById('main-sort-select').value;
+
+    // 전체 데이터에서 시작!
+    let filteredData = [...movieData];
+
+    // 2. 검색어가 있으면 제목으로 필터링
+    if (query) {
+        filteredData = filteredData.filter(m => m.title.toLowerCase().includes(query));
     }
 
-function getMyNickname() {
-    let myName = localStorage.getItem("myNickname");
-
-    if (!myName) {
-        const input = document.getElementById("review-user");
-        if (input && input.value.trim()) {
-            myName = input.value.trim();
-            localStorage.setItem("myNickname", myName);
-        }
+    // 💡 3. 친구 필터가 'all(전체보기)'이 아니면 선택한 친구만 남기기
+    if (friendVal !== 'all') {
+        // 주의: DB에 친구 이름이 저장되는 속성명(m.friend, m.with 등)에 맞춰 'm.friend' 부분을 수정해야 할 수 있습니다!
+        filteredData = filteredData.filter(m => m.friend === friendVal); 
     }
 
-    return myName;
+    // 4. 정렬 처리 (select에서 고른 값에 따라 순서 바꾸기)
+    if (sortVal === 'dateDesc') {
+        // 최신순 (예시)
+        filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else if (sortVal === 'ratingDesc') {
+        // 별점 높은순 (예시)
+        filteredData.sort((a, b) => b.rating - a.rating);
+    }
+    // (여기에 기존에 정렬용으로 짜두신 코드가 있다면 마저 넣어주시면 됩니다!)
+
+    // 5. 최종적으로 걸러진 데이터만 화면에 그리기
+    renderMovies(filteredData);
 }
 
 // 🌟 나의 별점 가져오는 함수 (화면 터짐 방지! 무적 패치 🛡️)
@@ -935,7 +1032,7 @@ function getMyRating(movie) {
     }
 
     function switchRightTab(tabType) {
-        const tabs = ['my', 'critics', 'column'];
+        const tabs = ['my', 'critics', 'column', 'quotes'];
         tabs.forEach(t => {
             const btn = document.getElementById(`right-tab-${t}`);
             const content = document.getElementById(`right-content-${t}`);
@@ -1815,6 +1912,202 @@ text = text.replace(
     );
 
     return text;
+}
+
+// 1. 명대사 등록 함수 (좋아요 & 댓글 껍데기 추가)
+function addQuote() {
+    const author = document.getElementById('new-quote-author').value;
+    const avatar = document.getElementById('new-quote-avatar').value;
+    const text = document.getElementById('new-quote-text').value;
+
+    if (!author || !text) return;
+
+    const list = document.getElementById('quotes-list');
+    const item = document.createElement('div');
+    item.className = "bg-white p-4 rounded-xl shadow-sm border";
+
+    const defaultAvatar = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+    const finalAvatar = avatar ? avatar : defaultAvatar;
+    
+    // 💡 각 명대사마다 고유한 아이디(시간값)를 부여해서 댓글창이 안 꼬이게 만듭니다.
+    const uniqueId = Date.now();
+
+    item.innerHTML = `
+        <div class="flex items-center gap-3 mb-2">
+            <img src="${finalAvatar}" class="w-8 h-8 rounded-full object-cover border border-gray-100">
+            <span class="font-bold text-sm">${author}</span>
+            
+            <div class="ml-auto flex gap-2">
+                <button onclick="editQuote(this)" class="text-xs font-bold text-gray-400 hover:text-blue-500 transition-colors">수정</button>
+                <button onclick="deleteQuote(this)" class="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors">삭제</button>
+            </div>
+        </div>
+        <p class="text-[15px] text-gray-800 leading-relaxed italic mt-1 break-words font-serif quote-text whitespace-pre-wrap">"${text}"</p>
+        
+        <div class="flex items-center gap-4 mt-3 pt-3 border-t border-gray-100 text-[11px] font-bold">
+            <button onclick="toggleQuoteLike(this)" class="flex items-center gap-1 text-gray-400 hover:text-rose-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" /></svg>
+                <span>좋아요</span> <span class="quote-like-count"></span>
+            </button>
+            <button onclick="toggleQuoteReplies(${uniqueId})" class="flex items-center gap-1 text-gray-400 hover:text-gray-700 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 11.996c0 2.29.982 4.415 2.682 5.928.32.285.503.702.482 1.137-.03.621-.115 1.332-.28 2.062a.75.75 0 0 0 .964.88c1.338-.404 2.476-.906 3.425-1.488.196-.12.427-.168.65-.138A11.08 11.08 0 0 0 12 20.25Z" /></svg>
+                답글 <span id="quote-reply-count-${uniqueId}"></span>
+            </button>
+        </div>
+
+        <div id="quote-replies-${uniqueId}" class="hidden mt-3 pt-1 relative z-20">
+            <div id="quote-replies-list-${uniqueId}" class="space-y-2 mb-2"></div>
+            <div class="flex gap-2 mt-2">
+                <input type="text" id="quote-reply-input-${uniqueId}" class="flex-1 bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-100" placeholder="답글 달기...">
+                <button onclick="addQuoteReply(${uniqueId})" class="bg-gray-800 text-white px-4 py-2 rounded-xl text-[11px] font-bold hover:bg-black transition-colors">등록</button>
+            </div>
+        </div>
+    `;
+
+    list.prepend(item);
+
+    // 입력 초기화
+    document.getElementById('new-quote-author').value = '';
+    document.getElementById('new-quote-avatar').value = '';
+    document.getElementById('new-quote-text').value = '';
+}
+
+// ============================================
+// 👇 아래부터는 새롭게 추가되는 좋아요/댓글 기능입니다!
+// (기존 deleteQuote와 editQuote 위나 아래에 붙여넣으시면 됩니다)
+// ============================================
+
+// ❤️ 명대사 좋아요 토글 함수
+function toggleQuoteLike(btn) {
+    const svg = btn.querySelector('svg');
+    const countSpan = btn.querySelector('.quote-like-count');
+    const isLiked = btn.classList.contains('text-rose-500');
+    
+    if (isLiked) {
+        btn.classList.remove('text-rose-500');
+        btn.classList.add('text-gray-400');
+        svg.setAttribute('fill', 'none');
+        countSpan.innerText = ''; // 좋아요 취소
+    } else {
+        btn.classList.remove('text-gray-400');
+        btn.classList.add('text-rose-500');
+        svg.setAttribute('fill', 'currentColor');
+        countSpan.innerText = '1'; // 화면상에 1로 표시
+    }
+}
+
+// 💬 명대사 답글 창 열기/닫기
+function toggleQuoteReplies(id) {
+    const replyDiv = document.getElementById(`quote-replies-${id}`);
+    replyDiv.classList.toggle('hidden');
+}
+
+// ✍️ 명대사 답글 등록 함수
+function addQuoteReply(id) {
+    const input = document.getElementById(`quote-reply-input-${id}`);
+    const text = input.value.trim();
+    
+    if (!text) return;
+    
+    const list = document.getElementById(`quote-replies-list-${id}`);
+    const replyItem = document.createElement('div');
+    replyItem.className = "flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100";
+    
+    // 답글 내용 HTML
+    replyItem.innerHTML = `
+        <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[10px] shrink-0">👤</div>
+        <div class="flex-1">
+            <span class="font-bold text-[11px] mr-1">익명</span>
+            <span class="text-[11px] text-gray-700">${text}</span>
+        </div>
+        <button onclick="this.closest('.flex.items-start').remove(); updateQuoteReplyCount(${id});" class="text-[10px] text-gray-400 hover:text-red-400 ml-auto px-1">✕</button>
+    `;
+    
+    list.appendChild(replyItem);
+    input.value = ''; // 입력창 초기화
+    updateQuoteReplyCount(id); // 답글 개수 갱신
+}
+
+// 🔢 명대사 답글 개수 카운터 업데이트
+function updateQuoteReplyCount(id) {
+    const list = document.getElementById(`quote-replies-list-${id}`);
+    const countSpan = document.getElementById(`quote-reply-count-${id}`);
+    const count = list.children.length;
+    countSpan.innerText = count > 0 ? count : '';
+}
+
+// 분석 모달 열기
+function openAnalysisModal() {
+    document.getElementById('analysis-modal').classList.remove('hidden');
+    // 나중에 여기에 calculateTasteStats() 같은 통계 계산 함수를 부를 겁니다!
+}
+
+// 분석 모달 닫기
+function closeAnalysisModal() {
+    document.getElementById('analysis-modal').classList.add('hidden');
+}
+
+// 💡 분석 모달창 열기 (업데이트)
+function openAnalysisModal() {
+    const friendVal = document.getElementById('friend-filter-select').value;
+    
+    // 전체 보기가 선택되어 있으면 누구를 분석할지 물어봅니다.
+    if (friendVal === 'all') {
+        alert("📊 먼저 필터에서 분석할 친구를 선택해주세요! (예: 참치)");
+        return;
+    }
+
+    // 통계 계산 함수 실행
+    calculateTasteStats(friendVal);
+    
+    // 모달창 띄우기
+    document.getElementById('analysis-modal').classList.remove('hidden');
+}
+
+// 💡 취향 매칭률 및 통계 계산 함수
+function calculateTasteStats(friendName) {
+    // 1. 해당 친구와 함께 본 영화만 쏙 골라내기
+    const sharedMovies = movieData.filter(m => m.withFriend === friendName);
+
+    // 2. 함께 본 총 영화 개수 찍어주기
+    document.getElementById('stat-total-movies').innerText = sharedMovies.length;
+
+    // (같이 본 영화가 하나도 없을 경우 방어 코드)
+    if (sharedMovies.length === 0) {
+        document.getElementById('stat-match-rate').innerText = '0';
+        document.getElementById('stat-top-genre').innerText = '?';
+        document.getElementById('stat-best-movies').innerHTML = '<p class="text-sm text-gray-400 mt-2">아직 함께 본 영화가 없어요.</p>';
+        return;
+    }
+
+    // 3. 최애 장르 구하기 (가장 많이 겹치는 장르)
+    const genreCounts = {};
+    sharedMovies.forEach(m => {
+        // 영화에 장르(genre) 데이터가 있다면 개수를 셉니다.
+        if(m.genre) {
+            genreCounts[m.genre] = (genreCounts[m.genre] || 0) + 1;
+        }
+    });
+    // 가장 많이 나온 장르 찾기 (없으면 '장르 모름')
+    const topGenre = Object.keys(genreCounts).sort((a,b) => genreCounts[b] - genreCounts[a])[0] || "다양함";
+    document.getElementById('stat-top-genre').innerText = topGenre;
+
+    // 4. 취향 매칭률 계산 (지금은 별점(myRating) 평균을 기반으로 한 가짜 매칭률 공식입니다)
+    // 찐 매칭률을 하려면 DB에 '내 별점'과 '친구 별점'이 따로 저장되어 있어야 합니다!
+    const avgRating = sharedMovies.reduce((sum, m) => sum + Number(m.myRating || 5), 0) / sharedMovies.length;
+    // 별점이 높을수록 매칭률이 70~99% 사이로 예쁘게 나오게 하는 마법의 공식 ✨
+    const matchRate = Math.floor(60 + (avgRating / 5) * 39); 
+    document.getElementById('stat-match-rate').innerText = matchRate;
+
+    // 5. 서로 최고점을 준 영화 리스트 (별점 4.5 이상인 것들만 뱃지로 만들기)
+    const bestMovies = sharedMovies.filter(m => Number(m.myRating) >= 4.5).slice(0, 4);
+    const bestMoviesHtml = bestMovies.map(m => `
+        <div class="bg-white border border-rose-200 text-rose-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm">
+            ${m.title}
+        </div>
+    `).join('');
+    
+    document.getElementById('stat-best-movies').innerHTML = bestMoviesHtml || '<p class="text-xs text-gray-400 mt-2">아직 최고점을 준 영화가 없어요!</p>';
 }
 
 
